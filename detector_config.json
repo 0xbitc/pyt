@@ -2,5 +2,8 @@
     "min_rgb": [200, 120, 180],
     "max_rgb": [255, 200, 255],
     "min_percent": 0.01,
-    "trigger_key": "a"
+    "trigger_key": "a",
+    "capture_width": 30,
+    "capture_height": 10,
+    "border_width": 3
 }

@@ -55,11 +55,15 @@ def main():
     # Вывод информации
     print_startup_info(detector)
     
-    # Создание GUI
+    # Загрузка параметров окна из detector_config.json
+    with open("detector_config.json", "r", encoding="utf-8") as f:
+        detector_config = json.load(f)
+    
+    # Создание GUI с параметрами из конфига детектора
     overlay = DraggableOverlay(
-        width=config.CAPTURE_WIDTH,
-        height=config.CAPTURE_HEIGHT,
-        border_width=config.BORDER_WIDTH
+        width=detector_config.get("capture_width", config.CAPTURE_WIDTH),
+        height=detector_config.get("capture_height", config.CAPTURE_HEIGHT),
+        border_width=detector_config.get("border_width", config.BORDER_WIDTH)
     )
 
     # Создание захватчика
