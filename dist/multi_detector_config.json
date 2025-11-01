@@ -5,16 +5,16 @@
             "name": "Detector 1",
             "width": 10,
             "height": 130,
-            "trigger_key": "1",
+            "trigger_key": "a",
             "min_rgb": [
-                200,
-                0,
-                0
+                170,
+                160,
+                190
             ],
             "max_rgb": [
                 255,
-                50,
-                50
+                200,
+                255
             ],
             "active": true
         },
@@ -23,16 +23,16 @@
             "name": "Detector 2",
             "width": 10,
             "height": 130,
-            "trigger_key": "2",
+            "trigger_key": "d",
             "min_rgb": [
-                0,
-                200,
-                0
+                170,
+                170,
+                200
             ],
             "max_rgb": [
-                50,
-                255,
-                50
+                240,
+                250,
+                255
             ],
             "active": true
         },
@@ -41,15 +41,15 @@
             "name": "Detector 3",
             "width": 10,
             "height": 130,
-            "trigger_key": "3",
+            "trigger_key": "s",
             "min_rgb": [
-                0,
-                0,
+                170,
+                170,
                 200
             ],
             "max_rgb": [
-                50,
-                50,
+                240,
+                250,
                 255
             ],
             "active": true
@@ -59,22 +59,22 @@
             "name": "Detector 4",
             "width": 10,
             "height": 130,
-            "trigger_key": "4",
+            "trigger_key": "w",
             "min_rgb": [
-                200,
-                200,
-                0
+                170,
+                160,
+                190
             ],
             "max_rgb": [
                 255,
-                255,
-                50
+                200,
+                255
             ],
             "active": true
         }
     ],
     "global_settings": {
-        "border_width": 6,
+        "border_width": 3,
         "fps_limit": 90
     }
 }
