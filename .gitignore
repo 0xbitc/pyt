@@ -58,7 +58,6 @@ desktop.ini
 *.bak
 
 # Собранные exe файлы
-*.exe
 build_exe.bat
 
 # SSH ключи (ВАЖНО!)
