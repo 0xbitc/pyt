@@ -296,6 +296,8 @@ class DraggableOverlay:
     
     def update_fps(self, fps):
         """Обновить отображение FPS"""
+        # ОТЛАДКА
+        print(f"[DEBUG UI] Обновление FPS на UI: {fps:.1f}")
         self.canvas_right.itemconfig(self.fps_text_id, text=f"FPS: {int(fps)}")
     
     def set_capture_ref(self, capture):

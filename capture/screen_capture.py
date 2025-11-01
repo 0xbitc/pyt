@@ -137,6 +137,11 @@ class ScreenCapture:
         # Обновление FPS через безопасный вызов Tkinter
         self._update_fps(frame_start)
         avg_fps = self._calculate_average_fps()
+        
+        # ОТЛАДКА: выводим FPS в консоль
+        if self.frame_count % 30 == 0:
+            print(f"[DEBUG] Вычисленный FPS: {avg_fps:.1f}, fps_counter size: {len(self.fps_counter)}")
+        
         self.overlay.root.after(0, self.overlay.update_fps, avg_fps)
         
         self.frame_count += 1
@@ -184,9 +189,10 @@ class ScreenCapture:
     
     def _calculate_average_fps(self):
         """Вычисление среднего FPS"""
-        if not self.fps_counter:
+        if not self.fps_counter or len(self.fps_counter) == 0:
             return 0
-        return sum(self.fps_counter) / len(self.fps_counter)
+        avg = sum(self.fps_counter) / len(self.fps_counter)
+        return avg
     
     def _print_statistics(self):
         """Вывод финальной статистики"""
