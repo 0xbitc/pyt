@@ -4,7 +4,7 @@
 
 import config
 from ui.overlay import DraggableOverlay
-from capture.screen_capture_mss import ScreenCaptureMSS
+from capture.screen_capture import ScreenCapture
 from detectors.blue_detector import BlueDetector
 import json
 from detectors.soft_pink_detector import SoftPinkDetector
@@ -58,8 +58,8 @@ def main():
         border_width=detector_config.get("border_width", config.BORDER_WIDTH)
     )
 
-    # Используем MSS вместо dxcam (неограниченное количество экземпляров)
-    capture = ScreenCaptureMSS(
+    # Используем dxcam (поддерживает до 4 экземпляров через device_idx)
+    capture = ScreenCapture(
         overlay=overlay,
         detector=detector,
         target_fps=config.TARGET_FPS,
@@ -76,7 +76,7 @@ def main():
     try:
         overlay.run()
     except KeyboardInterrupt:
-        pass  # Убрали лог
+        pass
     finally:
         capture.stop()
         overlay.destroy()
