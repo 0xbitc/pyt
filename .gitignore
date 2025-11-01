@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Конфигурация детектора (может содержать персональные настройки)
+# Раскомментируйте, если хотите игнорировать:
+# detector_config.json
+
+# Временные файлы
+*.tmp
+*.bak
+
+# Собранные exe файлы
+*.exe
+build_exe.bat
+
+# SSH ключи (ВАЖНО!)
+*.ssh/
+*.pem
+*.key
+id_rsa
+id_rsa.pub
+pub
+
+# Скриншоты и тесты
+screenshots/
+test_*.png
