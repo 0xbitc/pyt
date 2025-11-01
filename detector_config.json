@@ -4,6 +4,8 @@
     "min_percent": 0.01,
     "trigger_key": "a",
     "capture_width": 30,
-    "capture_height": 10,
-    "border_width": 3
+    "capture_height": 80,
+    "border_width": 6,
+    "right_panel_width": 70,
+    "color_square_size": 30
 }

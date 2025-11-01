@@ -9,7 +9,7 @@ BORDER_WIDTH = 3
 
 # Параметры захвата
 TARGET_FPS = 120
-LOG_EVERY_N_FRAMES = 30
+LOG_EVERY_N_FRAMES = 300  # Логировать каждые 300 кадров (вместо 30) — в 10 раз реже
 
 # Настройки детекции синего цвета
 BLUE_DETECTION = {
@@ -19,6 +19,5 @@ BLUE_DETECTION = {
     'blue_dominance': 50
 }
 
-# Параметры overlay (окна)
-OVERLAY_RIGHT_PANEL_WIDTH = 180  # Ширина правой панели с информацией
-OVERLAY_COLOR_SQUARE_SIZE = 60   # Размер цветного квадрата
+# Параметры overlay (окна) - убраны, теперь в detector_config.json
+# OVERLAY_RIGHT_PANEL_WIDTH и OVERLAY_COLOR_SQUARE_SIZE теперь в detector_config.json

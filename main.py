@@ -13,19 +13,10 @@ from detectors.soft_pink_detector import SoftPinkDetector
 def print_startup_info(detector):
     """Вывод информации при запуске"""
     print("=" * 60)
-    print("Запуск программы детекции цвета на экране")
+    print("Запуск программы детекции цвета")
+    print(f"Детектор: {detector.get_name()}")
+    print("F8 - вкл/выкл все экземпляры")
     print("=" * 60)
-    print(f"\nАктивный детектор: {detector.get_name()}")
-    print(f"Размер области: {config.CAPTURE_WIDTH}x{config.CAPTURE_HEIGHT}")
-    print(f"Целевой FPS: {config.TARGET_FPS}")
-    print("\nИнструкции:")
-    print("- Перетащите рамку на нужную область экрана")
-    print("- Цвет рамки меняется в зависимости от содержимого")
-    print("- Справа отображается цветной квадрат и FPS")
-    print("- При обнаружении целевого цвета появится сообщение")
-    print("- Закройте окно для остановки программы")
-    print("=" * 60)
-    print()
 
 
 def create_detector():
@@ -84,11 +75,10 @@ def main():
     try:
         overlay.run()
     except KeyboardInterrupt:
-        print("\nПрервано пользователем")
+        pass  # Убрали лог
     finally:
         capture.stop()
         overlay.destroy()
-        print("Завершено")
 
 
 if __name__ == "__main__":

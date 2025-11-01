@@ -71,3 +71,9 @@ pub
 # Скриншоты и тесты
 screenshots/
 test_*.png
+
+# Позиция окна (персональная настройка)
+window_position.json
+
+# Глобальное состояние (не попадает в репозиторий)
+global_state.json
