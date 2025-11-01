@@ -1,0 +1,6 @@
+{
+    "min_rgb": [200, 120, 180],
+    "max_rgb": [255, 200, 255],
+    "min_percent": 0.01,
+    "trigger_key": "a"
+}
