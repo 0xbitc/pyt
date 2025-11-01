@@ -142,18 +142,21 @@ class ScreenCapture:
             except TypeError:
                 detected = self.detector.detect(r_avg, g_avg, b_avg)
         
-        # --- Управление клавишей (БЕЗ индикатора) ---
+        # --- Управление клавишей + индикатор ---
         if self.active:
             if detected and not self.a_pressed:
                 keyboard.press(self.trigger_key)
                 self.a_pressed = True
+                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, True)
             elif not detected and self.a_pressed:
                 keyboard.release(self.trigger_key)
                 self.a_pressed = False
+                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
         else:
             if self.a_pressed:
                 keyboard.release(self.trigger_key)
                 self.a_pressed = False
+                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
 
         # Обновление UI (не каждый кадр, а каждые N кадров)
         self.ui_update_counter += 1

@@ -171,12 +171,17 @@ class DraggableOverlay:
         chk_window = self.canvas_right.create_window(center_x, y, window=chk, anchor='n')
         y += 30
         
-        # 4. FPS (создаётся динамически в update_fps)
+        # 4. ИНДИКАТОР НАЖАТИЯ КЛАВИШИ (галочка)
+        self.key_pressed_y = y
+        self.key_pressed_id = None
+        y += 35
+        
+        # 5. FPS (создаётся динамически в update_fps)
         self.fps_y = y
         self.fps_id = None
         y += 40
         
-        # 5. ПОЛЕ ВВОДА КЛАВИШИ
+        # 6. ПОЛЕ ВВОДА КЛАВИШИ
         self.key_entry = tk.Entry(
             self.canvas_right,
             font=("Consolas", 14, "bold"),
@@ -261,3 +266,20 @@ class DraggableOverlay:
             self.root.destroy()
         except:
             pass
+    
+    def update_key_pressed_indicator(self, is_pressed):
+        """Обновить индикатор нажатия клавиши"""
+        if self.key_pressed_id:
+            self.canvas_right.delete(self.key_pressed_id)
+        
+        if is_pressed:
+            self.key_pressed_id = self.canvas_right.create_text(
+                self.right_panel_width // 2,
+                self.key_pressed_y,
+                text="✔",
+                fill='lime',
+                font=("Arial", 24, "bold"),
+                anchor='n'
+            )
+        else:
+            self.key_pressed_id = None
