@@ -8,6 +8,7 @@ from capture.screen_capture import ScreenCapture
 from detectors.blue_detector import BlueDetector
 import json
 from detectors.soft_pink_detector import SoftPinkDetector
+from detectors.universal_detector import UniversalDetector
 
 
 def print_startup_info(detector):
@@ -28,7 +29,7 @@ def create_detector():
     # Загрузка настроек из detector_config.json
     with open("detector_config.json", "r", encoding="utf-8") as f:
         config = json.load(f)
-    return SoftPinkDetector(config)
+    return UniversalDetector(config)
     
     # Примеры других детекторов (раскомментируйте нужный):
     # from detectors.red_detector import RedDetector
