@@ -10,7 +10,11 @@ from utils.color_utils import calculate_average_color, rgb_to_hex
 import keyboard
 from utils.global_state import GlobalState
 import os
+import threading
 
+# Глобальный счётчик для уникальных device_idx
+_device_idx_lock = threading.Lock()
+_device_idx_counter = 0
 
 class ScreenCapture:
     """Класс для захвата и анализа экрана"""
@@ -28,9 +32,20 @@ class ScreenCapture:
         self.target_fps = target_fps
         self.log_interval = log_interval
         
-        # Используем PID процесса для уникального device_idx
-        device_idx = os.getpid() % 4  # 0, 1, 2, 3
-        self.camera = dxcam.create(device_idx=device_idx, output_idx=0)
+        # Получаем уникальный device_idx для каждого экземпляра
+        global _device_idx_counter
+        with _device_idx_lock:
+            device_idx = _device_idx_counter % 4  # 0, 1, 2, 3
+            _device_idx_counter += 1
+        
+        print(f"[ScreenCapture] Используется device_idx={device_idx}")
+        
+        try:
+            self.camera = dxcam.create(device_idx=device_idx, output_idx=0)
+        except Exception as e:
+            print(f"[ERROR] Не удалось создать dxcam device_idx={device_idx}: {e}")
+            print("[INFO] Возможно, превышен лимит экземпляров (макс. 4)")
+            raise
         
         self.running = False
         self.fps_counter = deque(maxlen=30)
