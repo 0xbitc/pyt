@@ -192,7 +192,8 @@ class DraggableOverlay:
             bd=1,
             relief='solid'
         )
-        self.key_entry.insert(0, 'a')
+        # Загружаем значение из capture_ref (будет установлено через set_capture_ref)
+        # Пока оставляем пустым, заполним позже
         self.key_entry.bind('<Return>', self._on_key_change)
         self.key_entry.bind('<FocusOut>', self._on_key_change)
         entry_window = self.canvas_right.create_window(center_x, y, window=self.key_entry, anchor='n')
@@ -252,7 +253,12 @@ class DraggableOverlay:
         )
     
     def set_capture_ref(self, capture):
+        """Устанавливает ссылку на ScreenCapture и обновляет поле клавиши"""
         self.capture_ref = capture
+        # Обновляем поле ввода значением из детектора
+        if hasattr(capture, 'trigger_key'):
+            self.key_entry.delete(0, tk.END)
+            self.key_entry.insert(0, capture.trigger_key)
     
     def run(self):
         self.root.mainloop()

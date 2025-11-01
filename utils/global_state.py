@@ -63,15 +63,18 @@ class GlobalState:
         self.monitoring = False
     
     def _monitor_loop(self):
-        """Цикл мониторинга изменений состояния"""
+        """Цикл мониторинга (ОПТИМИЗИРОВАНО)"""
         while self.monitoring:
-            current_state = self.get_active()
-            if current_state != self._last_state:
-                self._last_state = current_state
-                # Уведомляем всех наблюдателей
-                for callback in self.observers:
-                    try:
-                        callback(current_state)
-                    except:
-                        pass
-            time.sleep(1.0)  # Проверяем раз в секунду (меньше нагрузка)
+            try:
+                current_state = self.get_active()
+                if current_state != self._last_state:
+                    self._last_state = current_state
+                    # Уведомляем наблюдателей
+                    for callback in self.observers:
+                        try:
+                            callback(current_state)
+                        except:
+                            pass
+            except:
+                pass  # Игнорируем ошибки чтения файла
+            time.sleep(1.5)  # Проверяем раз в 1.5 сек (меньше нагрузка)

@@ -73,10 +73,15 @@ class ScreenCapture:
         self.ui_update_counter = 0
         self.ui_update_interval = 1  # Обновляем каждый кадр (не 5!)
 
-        # Кэш для предотвращения избыточных обновлений
+        # Кэш для минимизации вызовов
         self._last_key_pressed_state = None
         self._last_fps_update = 0
-        self.fps_update_interval = 1.0  # FPS обновляем раз в секунду (не важен для реакции)
+        self.fps_update_interval = 1.0
+        
+        # Предварительное кэширование методов для скорости
+        self._keyboard_press = keyboard.press
+        self._keyboard_release = keyboard.release
+        self._overlay_after = overlay.root.after
     
     def start(self):
         """Запуск захвата в отдельном потоке"""
@@ -139,69 +144,57 @@ class ScreenCapture:
         self.camera.start(target_fps=self.target_fps, region=region)
     
     def _process_frame(self):
-        """Обработка одного кадра (МАКСИМАЛЬНАЯ СКОРОСТЬ)"""
-        frame_start = time.time()
+        """Обработка одного кадра (УЛЬТРА ОПТИМИЗАЦИЯ)"""
         frame = self.camera.get_latest_frame()
         
         if frame is None:
             return
         
-        # Получаем размеры кадра
-        height, width = frame.shape[:2]
-        cy = height // 2
-        cx = width // 2
+        frame_start = time.time()
         
-        # dxcam возвращает RGB
-        pixel = frame[cy, cx]
-        center_rgb = (int(pixel[0]), int(pixel[1]), int(pixel[2]))
-
-        # Вычисляем средний цвет (для детектора и UI)
-        r_avg, g_avg, b_avg = calculate_average_color(frame)
-
-        # --- ДЕТЕКЦИЯ (КРИТИЧЕСКИЙ ПУТЬ - БЕЗ ЗАДЕРЖЕК) ---
-        detected = False
-        if hasattr(self.detector, "detect"):
-            try:
-                detected = self.detector.detect(r_avg, g_avg, b_avg, frame=frame)
-            except TypeError:
-                detected = self.detector.detect(r_avg, g_avg, b_avg)
+        # --- ДЕТЕКЦИЯ (БЕЗ ЛИШНИХ ВЫЧИСЛЕНИЙ) ---
+        # Передаём frame напрямую в детектор, он сам вычислит что нужно
+        detected = self.detector.detect(0, 0, 0, frame=frame)
         
-        # --- УПРАВЛЕНИЕ КЛАВИШЕЙ (МГНОВЕННО!) ---
+        # --- УПРАВЛЕНИЕ КЛАВИШЕЙ (КРИТИЧЕСКИЙ ПУТЬ) ---
         if self.active:
-            if detected and not self.a_pressed:
-                keyboard.press(self.trigger_key)
-                self.a_pressed = True
-               
-                if self._last_key_pressed_state != True:
-                    self._last_key_pressed_state = True
-                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, True)
-            elif not detected and self.a_pressed:
-                keyboard.release(self.trigger_key)
-                self.a_pressed = False
-            
-                if self._last_key_pressed_state != False:
-                    self._last_key_pressed_state = False
-                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
+            if detected != self.a_pressed:  # Оптимизация: одна проверка вместо двух
+                if detected:
+                    self._keyboard_press(self.trigger_key)
+                    self.a_pressed = True
+                    if self._last_key_pressed_state != True:
+                        self._last_key_pressed_state = True
+                        self._overlay_after(0, self.overlay.update_key_pressed_indicator, True)
+                else:
+                    self._keyboard_release(self.trigger_key)
+                    self.a_pressed = False
+                    if self._last_key_pressed_state != False:
+                        self._last_key_pressed_state = False
+                        self._overlay_after(0, self.overlay.update_key_pressed_indicator, False)
         else:
             if self.a_pressed:
-                keyboard.release(self.trigger_key)
+                self._keyboard_release(self.trigger_key)
                 self.a_pressed = False
                 if self._last_key_pressed_state != False:
                     self._last_key_pressed_state = False
-                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
+                    self._overlay_after(0, self.overlay.update_key_pressed_indicator, False)
 
-        # Обновление FPS счётчика
-        self._update_fps(frame_start)
+        # FPS (минимальное влияние)
+        frame_time = time.time() - frame_start
+        if frame_time > 0:
+            self.fps_counter.append(1 / frame_time)
         self.frame_count += 1
 
-        # Обновление UI (каждый кадр для квадрата, FPS реже)
-        self.overlay.update_border_color('', pixel_rgb=center_rgb)
-        
+        # UI обновление (раз в секунду)
         current_time = time.time()
-        if current_time - self._last_fps_update >= self.fps_update_interval:
+        if current_time - self._last_fps_update >= 1.0:
             self._last_fps_update = current_time
-            avg_fps = self._calculate_average_fps()
-            self.overlay.root.after(0, self.overlay.update_fps, avg_fps)
+            # Берём средний цвет центрального пикселя для квадрата
+            cy, cx = frame.shape[0] // 2, frame.shape[1] // 2
+            center_rgb = tuple(map(int, frame[cy, cx]))
+            self.overlay.update_border_color('', pixel_rgb=center_rgb)
+            avg_fps = sum(self.fps_counter) / len(self.fps_counter) if self.fps_counter else 0
+            self._overlay_after(0, self.overlay.update_fps, avg_fps)
     
     def _update_fps(self, frame_start):
         """Обновление счетчика FPS"""

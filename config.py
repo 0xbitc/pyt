@@ -7,9 +7,11 @@ CAPTURE_WIDTH = 80
 CAPTURE_HEIGHT = 10
 BORDER_WIDTH = 3
 
-# Параметры захвата
-TARGET_FPS = 240  # Максимальная скорость (было 120)
-LOG_EVERY_N_FRAMES = 300  # Логировать каждые 300 кадров (вместо 30) — в 10 раз реже
+# Параметры захвата (МАКСИМАЛЬНАЯ СКОРОСТЬ)
+TARGET_FPS = 300  # Увеличили до 300 для минимальной задержки
+
+# Параметры логирования (ОТКЛЮЧЕНО)
+LOG_EVERY_N_FRAMES = 99999  # Практически не логируем
 
 # Настройки детекции синего цвета
 BLUE_DETECTION = {
@@ -22,5 +24,5 @@ BLUE_DETECTION = {
 # Параметры overlay (окна) - убраны, теперь в detector_config.json
 # OVERLAY_RIGHT_PANEL_WIDTH и OVERLAY_COLOR_SQUARE_SIZE теперь в detector_config.json
 
-# Параметры производительности
-UI_UPDATE_INTERVAL = 5  # Обновляем UI каждые 5 кадров (вместо 3)
+# Параметры производительности (УБРАНО - не используется)
+# UI_UPDATE_INTERVAL = 5
