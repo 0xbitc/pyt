@@ -1,0 +1,80 @@
+{
+    "detectors": [
+        {
+            "id": 1,
+            "name": "Detector 1",
+            "width": 10,
+            "height": 130,
+            "trigger_key": "1",
+            "min_rgb": [
+                200,
+                0,
+                0
+            ],
+            "max_rgb": [
+                255,
+                50,
+                50
+            ],
+            "active": true
+        },
+        {
+            "id": 2,
+            "name": "Detector 2",
+            "width": 10,
+            "height": 130,
+            "trigger_key": "2",
+            "min_rgb": [
+                0,
+                200,
+                0
+            ],
+            "max_rgb": [
+                50,
+                255,
+                50
+            ],
+            "active": true
+        },
+        {
+            "id": 3,
+            "name": "Detector 3",
+            "width": 10,
+            "height": 130,
+            "trigger_key": "3",
+            "min_rgb": [
+                0,
+                0,
+                200
+            ],
+            "max_rgb": [
+                50,
+                50,
+                255
+            ],
+            "active": true
+        },
+        {
+            "id": 4,
+            "name": "Detector 4",
+            "width": 10,
+            "height": 130,
+            "trigger_key": "4",
+            "min_rgb": [
+                200,
+                200,
+                0
+            ],
+            "max_rgb": [
+                255,
+                255,
+                50
+            ],
+            "active": true
+        }
+    ],
+    "global_settings": {
+        "border_width": 6,
+        "fps_limit": 90
+    }
+}

@@ -33,7 +33,7 @@ class DraggableOverlay:
         
         # Общие размеры окна
         canvas_height = self.height + 2 * self.border_width
-        self.total_height = max(canvas_height, 250)
+        self.total_height = max(canvas_height, 200)  # Уменьшена высота
         self.total_width = self.width + 2 * self.border_width + self.right_panel_width
         
         # Загружаем сохранённую позицию или центрируем
@@ -102,9 +102,11 @@ class DraggableOverlay:
         )
         self.canvas_right.pack(side=tk.LEFT, anchor='nw', fill=tk.Y)
         
-        # ВАЖНО: Привязка событий для перемещения к ЛЕВОМУ canvas
+        # Привязка событий для перемещения к ОБОИМ canvas
         self.canvas_left.bind('<Button-1>', self._on_mouse_press)
         self.canvas_left.bind('<B1-Motion>', self._on_mouse_drag)
+        self.canvas_right.bind('<Button-1>', self._on_mouse_press)
+        self.canvas_right.bind('<B1-Motion>', self._on_mouse_drag)
         
         self._create_controls()
     
@@ -156,15 +158,19 @@ class DraggableOverlay:
         )
         y += self.color_square_size + 15
         
-        # 3. CHECKBOX
+        # 3. CHECKBOX - БЕЗ прозрачности
         self.active_var = tk.BooleanVar(value=True)
         chk = tk.Checkbutton(
             self.canvas_right,
             variable=self.active_var,
             command=self._on_toggle_active,
             bg='#0a0a0a',
-            selectcolor='#1a1a1a',
-            bd=0
+            activebackground='#0a0a0a',
+            selectcolor='#2a2a2a',
+            fg='white',
+            bd=1,
+            relief='solid',
+            highlightthickness=0
         )
         chk_window = self.canvas_right.create_window(center_x, y, window=chk, anchor='n')
         y += 30
@@ -174,12 +180,7 @@ class DraggableOverlay:
         self.key_pressed_id = None
         y += 35
         
-        # 5. FPS (создаётся динамически в update_fps)
-        self.fps_y = y
-        self.fps_id = None
-        y += 40
-        
-        # 6. ПОЛЕ ВВОДА КЛАВИШИ
+        # 5. ПОЛЕ ВВОДА КЛАВИШИ
         self.key_entry = tk.Entry(
             self.canvas_right,
             font=("Consolas", 14, "bold"),
@@ -191,8 +192,6 @@ class DraggableOverlay:
             bd=1,
             relief='solid'
         )
-        # Загружаем значение из capture_ref (будет установлено через set_capture_ref)
-        # Пока оставляем пустым, заполним позже
         self.key_entry.bind('<Return>', self._on_key_change)
         self.key_entry.bind('<FocusOut>', self._on_key_change)
         entry_window = self.canvas_right.create_window(center_x, y, window=self.key_entry, anchor='n')
@@ -217,11 +216,26 @@ class DraggableOverlay:
     def _on_mouse_drag(self, event):
         x = self.root.winfo_x() + event.x - self.drag_x
         y = self.root.winfo_y() + event.y - self.drag_y
+        
+        # Ограничиваем позицию окна в пределах экрана
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # Минимальные координаты (чтобы рамка захвата была на экране)
+        min_x = -self.border_width
+        min_y = -self.border_width
+        
+        # Максимальные координаты (чтобы правая нижняя часть рамки была на экране)
+        max_x = screen_width - self.width - self.border_width - self.right_panel_width
+        max_y = screen_height - self.height - self.border_width
+        
+        # Применяем ограничения
+        x = max(min_x, min(x, max_x))
+        y = max(min_y, min(y, max_y))
+        
         self.root.geometry(f'+{x}+{y}')
-        # Сохраняем позицию при перемещении (с задержкой через after)
-        if hasattr(self, '_save_timer'):
-            self.root.after_cancel(self._save_timer)
-        self._save_timer = self.root.after(500, self._save_position)
+        # Не сохраняем автоматически при перемещении в multi-режиме
+        # Сохранение будет через MultiDetectorCapture
     
     def get_position(self):
         win_x = self.root.winfo_x()
@@ -239,17 +253,8 @@ class DraggableOverlay:
             self.canvas_right.itemconfig(self.color_square_id, fill=color)
     
     def update_fps(self, fps):
-        if self.fps_id:
-            self.canvas_right.delete(self.fps_id)
-        
-        self.fps_id = self.canvas_right.create_text(
-            self.right_panel_width // 2,
-            self.fps_y,
-            text=f"{int(fps)}",
-            fill='#00ff00',
-            font=("Consolas", 20, "bold"),
-            anchor='n'
-        )
+        """Заглушка для совместимости (FPS больше не отображается)"""
+        pass
     
     def set_capture_ref(self, capture):
         """Устанавливает ссылку на ScreenCapture и обновляет поле клавиши"""
