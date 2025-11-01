@@ -11,6 +11,7 @@ import keyboard
 from utils.global_state import GlobalState
 import os
 import threading
+import config as app_config
 
 # Глобальный счётчик для уникальных device_idx
 _device_idx_lock = threading.Lock()
@@ -68,9 +69,14 @@ class ScreenCapture:
         self.global_state.add_observer(self._on_state_changed)
         self.global_state.start_monitoring()
         
-        # Добавляем счётчик для обновления UI (не каждый кадр)
+        # Убираем интервал обновления UI - обновляем каждый кадр для мгновенного отклика
         self.ui_update_counter = 0
-        self.ui_update_interval = 3  # Обновляем UI каждые 3 кадра вместо каждого
+        self.ui_update_interval = 1  # Обновляем каждый кадр (не 5!)
+
+        # Кэш для предотвращения избыточных обновлений
+        self._last_key_pressed_state = None
+        self._last_fps_update = 0
+        self.fps_update_interval = 1.0  # FPS обновляем раз в секунду (не важен для реакции)
     
     def start(self):
         """Запуск захвата в отдельном потоке"""
@@ -133,7 +139,7 @@ class ScreenCapture:
         self.camera.start(target_fps=self.target_fps, region=region)
     
     def _process_frame(self):
-        """Обработка одного кадра"""
+        """Обработка одного кадра (МАКСИМАЛЬНАЯ СКОРОСТЬ)"""
         frame_start = time.time()
         frame = self.camera.get_latest_frame()
         
@@ -145,15 +151,14 @@ class ScreenCapture:
         cy = height // 2
         cx = width // 2
         
-        # dxcam возвращает RGB (НЕ BGR как OpenCV!)
+        # dxcam возвращает RGB
         pixel = frame[cy, cx]
-        center_rgb = (int(pixel[0]), int(pixel[1]), int(pixel[2]))  # RGB как есть
+        center_rgb = (int(pixel[0]), int(pixel[1]), int(pixel[2]))
 
-        # Вычисляем средний цвет всей области (уже в RGB)
+        # Вычисляем средний цвет (для детектора и UI)
         r_avg, g_avg, b_avg = calculate_average_color(frame)
-        hex_color_avg = rgb_to_hex(r_avg, g_avg, b_avg)
 
-        # --- Используем frame для детектора ---
+        # --- ДЕТЕКЦИЯ (КРИТИЧЕСКИЙ ПУТЬ - БЕЗ ЗАДЕРЖЕК) ---
         detected = False
         if hasattr(self.detector, "detect"):
             try:
@@ -161,37 +166,42 @@ class ScreenCapture:
             except TypeError:
                 detected = self.detector.detect(r_avg, g_avg, b_avg)
         
-        # --- Управление клавишей (КАЖДЫЙ КАДР!) ---
+        # --- УПРАВЛЕНИЕ КЛАВИШЕЙ (МГНОВЕННО!) ---
         if self.active:
             if detected and not self.a_pressed:
                 keyboard.press(self.trigger_key)
                 self.a_pressed = True
-                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, True)
+               
+                if self._last_key_pressed_state != True:
+                    self._last_key_pressed_state = True
+                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, True)
             elif not detected and self.a_pressed:
                 keyboard.release(self.trigger_key)
                 self.a_pressed = False
-                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
+            
+                if self._last_key_pressed_state != False:
+                    self._last_key_pressed_state = False
+                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
         else:
             if self.a_pressed:
                 keyboard.release(self.trigger_key)
                 self.a_pressed = False
-                self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
+                if self._last_key_pressed_state != False:
+                    self._last_key_pressed_state = False
+                    self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
 
-        # Обновление FPS счётчика (каждый кадр)
+        # Обновление FPS счётчика
         self._update_fps(frame_start)
         self.frame_count += 1
 
-        # Обновление UI (каждые N кадров для производительности)
-        self.ui_update_counter += 1
-        if self.ui_update_counter >= self.ui_update_interval:
-            self.ui_update_counter = 0
-            self.overlay.update_border_color('', pixel_rgb=center_rgb)
+        # Обновление UI (каждый кадр для квадрата, FPS реже)
+        self.overlay.update_border_color('', pixel_rgb=center_rgb)
+        
+        current_time = time.time()
+        if current_time - self._last_fps_update >= self.fps_update_interval:
+            self._last_fps_update = current_time
             avg_fps = self._calculate_average_fps()
             self.overlay.root.after(0, self.overlay.update_fps, avg_fps)
-        
-        # Логирование (ТОЛЬКО при детекции)
-        if detected:
-            self._log_detection(r_avg, g_avg, b_avg)
     
     def _update_fps(self, frame_start):
         """Обновление счетчика FPS"""
@@ -235,5 +245,6 @@ class ScreenCapture:
         
         print("\n=== СТАТИСТИКА ===")
         print(f"Всего кадров: {self.frame_count}")
-        print(f"Время работы: {total_time:.2f} секунд")
+
+        print(f"Время работы: {total_time:.2f} секунд")      
         print(f"Средний FPS: {avg_fps:.1f}")

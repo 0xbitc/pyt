@@ -102,11 +102,10 @@ class DraggableOverlay:
         )
         self.canvas_right.pack(side=tk.LEFT, anchor='nw', fill=tk.Y)
         
-        # Привязка событий
+        # Привязка событий ТОЛЬКО к левому canvas (рамке)
         self.canvas_left.bind('<Button-1>', self._on_mouse_press)
         self.canvas_left.bind('<B1-Motion>', self._on_mouse_drag)
-        self.canvas_right.bind('<Button-1>', self._on_mouse_press)
-        self.canvas_right.bind('<B1-Motion>', self._on_mouse_drag)
+        # УБРАЛИ привязку к правому canvas — теперь кнопки работают нормально
         
         self._create_controls()
     

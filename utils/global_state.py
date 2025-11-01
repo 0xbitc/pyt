@@ -74,4 +74,4 @@ class GlobalState:
                         callback(current_state)
                     except:
                         pass
-            time.sleep(0.5)  # Проверяем каждые 500ms вместо 100ms (меньше нагрузка)
+            time.sleep(1.0)  # Проверяем раз в секунду (меньше нагрузка)
