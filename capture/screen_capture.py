@@ -9,6 +9,7 @@ import dxcam
 from utils.color_utils import calculate_average_color, rgb_to_hex
 import keyboard
 from utils.global_state import GlobalState
+import os
 
 
 class ScreenCapture:
@@ -27,7 +28,10 @@ class ScreenCapture:
         self.target_fps = target_fps
         self.log_interval = log_interval
         
-        self.camera = dxcam.create()
+        # Используем PID процесса для уникального device_idx
+        device_idx = os.getpid() % 4  # 0, 1, 2, 3
+        self.camera = dxcam.create(device_idx=device_idx, output_idx=0)
+        
         self.running = False
         self.fps_counter = deque(maxlen=30)
         self.frame_count = 0
@@ -142,7 +146,7 @@ class ScreenCapture:
             except TypeError:
                 detected = self.detector.detect(r_avg, g_avg, b_avg)
         
-        # --- Управление клавишей + индикатор ---
+        # --- Управление клавишей (КАЖДЫЙ КАДР!) ---
         if self.active:
             if detected and not self.a_pressed:
                 keyboard.press(self.trigger_key)
@@ -158,7 +162,11 @@ class ScreenCapture:
                 self.a_pressed = False
                 self.overlay.root.after(0, self.overlay.update_key_pressed_indicator, False)
 
-        # Обновление UI (не каждый кадр, а каждые N кадров)
+        # Обновление FPS счётчика (каждый кадр)
+        self._update_fps(frame_start)
+        self.frame_count += 1
+
+        # Обновление UI (каждые N кадров для производительности)
         self.ui_update_counter += 1
         if self.ui_update_counter >= self.ui_update_interval:
             self.ui_update_counter = 0
@@ -166,11 +174,7 @@ class ScreenCapture:
             avg_fps = self._calculate_average_fps()
             self.overlay.root.after(0, self.overlay.update_fps, avg_fps)
         
-        # Обновление FPS
-        self._update_fps(frame_start)
-        self.frame_count += 1
-        
-        # Логирование (ТОЛЬКО при детекции, регулярные логи убраны)
+        # Логирование (ТОЛЬКО при детекции)
         if detected:
             self._log_detection(r_avg, g_avg, b_avg)
     

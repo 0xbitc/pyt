@@ -1,6 +1,6 @@
 {
-    "min_rgb": [210, 235, 250],
-    "max_rgb": [245, 255, 255],
+    "min_rgb": [180, 200, 210],
+    "max_rgb": [240, 250, 255],
     "min_percent": 0.02,
     "trigger_key": "a",
     "capture_width": 30,
